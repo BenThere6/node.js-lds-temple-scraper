@@ -1,0 +1,22 @@
+{
+  "name": "node.js-lds-temple-scraper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BenThere6/node.js-lds-temple-scraper.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/BenThere6/node.js-lds-temple-scraper/issues"
+  },
+  "homepage": "https://github.com/BenThere6/node.js-lds-temple-scraper#readme",
+  "dependencies": {
+    "puppeteer": "^22.6.3"
+  }
+}
