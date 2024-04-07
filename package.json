@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/BenThere6/node.js-lds-temple-scraper#readme",
   "dependencies": {
+    "inquirer": "^9.2.17",
     "puppeteer": "^22.6.3"
   }
 }
