@@ -9,16 +9,16 @@ async function scrape(url) {
         await page.goto(url);
         
         // Wait for the elements to be fully loaded
-        await page.waitForSelector('.templeName-2MBmf', { timeout: 60000 });
-        await page.waitForSelector('.templeLocation-27z9P', { timeout: 60000 });
-        await page.waitForSelector('.dedicated-2xVdg', { timeout: 60000 });
+        await page.waitForSelector('.DataList_templeName__fb4KU', { timeout: 60000 });
+        await page.waitForSelector('.DataList_templeLocation___W0oB', { timeout: 60000 });
+        await page.waitForSelector('.DataList_dedicated__T01EI', { timeout: 60000 });
 
         console.log('Selectors found, scraping data...');
         
         const data = await page.evaluate(() => {
-            const nameElements = Array.from(document.querySelectorAll('.templeName-2MBmf'));
-            const locElements = Array.from(document.querySelectorAll('.templeLocation-27z9P'));
-            const dateElements = Array.from(document.querySelectorAll('.dedicated-2xVdg'));
+            const nameElements = Array.from(document.querySelectorAll('.DataList_templeName__fb4KU'));
+            const locElements = Array.from(document.querySelectorAll('.DataList_templeLocation___W0oB'));
+            const dateElements = Array.from(document.querySelectorAll('.DataList_dedicated__T01EI'));
 
             const names = nameElements.map(element => element.textContent.trim());
             const locations = locElements.map(element => element.textContent.trim());
