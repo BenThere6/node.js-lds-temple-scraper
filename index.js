@@ -24,7 +24,7 @@ async function scrapeTempleDetails(url, templeData) {
         if (address) {
             templeData.Address = address.trim().replace(/\n/g, ', '); // Replace newline characters with ', '
         } else {
-            templeData.Address = null;
+            delete templeData.Address; // Remove the Address property if the address is not available
         }
     } catch (error) {
         console.error('An error occurred while scraping temple details:', error);
@@ -69,9 +69,9 @@ async function scrapeTempleList(url) {
             }));
         });
 
-        // Iterate through each temple and scrape its details page if it's in Utah
+        // Iterate through each temple and scrape its details page if it's in Utah and doesn't have an address
         for (const temple of templeData) {
-            if (temple.Location && temple.Location.toLowerCase().includes('utah')) {
+            if (temple.Location && temple.Location.toLowerCase().includes('utah') && !temple.Address) {
                 utahTempleCount++; // Increment the counter for Utah temples
                 const templeNameSlug = temple.Name.toLowerCase().replace(/\s+/g, '-');
                 const templeDetailsUrl = `https://www.churchofjesuschrist.org/temples/details/${templeNameSlug}?lang=eng`;
@@ -80,7 +80,7 @@ async function scrapeTempleList(url) {
 
                 await scrapeTempleDetails(templeDetailsUrl, temple);
             } else {
-                console.log('Skipping temple outside Utah:', temple.Name);
+                console.log('Skipping temple:', temple.Name);
             }
         }
 
