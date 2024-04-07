@@ -75,21 +75,29 @@ async function scrapeTempleList(url) {
         });
 
         // Read existing data from temples.json
-        const existingData = JSON.parse(fs.readFileSync('temples.json'));
+        let existingData = []
+        let noExisting = false;
+        try {
+            existingData = JSON.parse(fs.readFileSync('temples.json'));
+        } catch {
+            console.log('No current temples.json file')
+            noExisting = true;
+        }
+
 
         // Iterate through each temple
         for (const temple of templeData) {
             if (temple.Location && temple.Location.toLowerCase().includes('utah')) {
                 utahTempleCount++; // Increment the counter for Utah temples
-        
+
                 // Find the corresponding temple in existing data
                 const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
-        
+
                 if (existingTempleIndex !== -1) {
                     // If the temple previously had 'announced', 'renovation', or 'construction', and now has a valid date and address, it's opened
                     if ((existingData[existingTempleIndex].Date.toLowerCase() === 'announced' || existingData[existingTempleIndex].Date.toLowerCase() === 'renovation' || existingData[existingTempleIndex].Date.toLowerCase() === 'construction') &&
                         (temple.Date && temple.Date.toLowerCase() !== 'announced' && temple.Date.toLowerCase() !== 'renovation' && temple.Date.toLowerCase() !== 'construction') && temple.Address) {
-                            recentlyOpenedTemples.push(temple.Name);
+                        recentlyOpenedTemples.push(temple.Name);
                     } else {
                         // console.log(temple.Name, existingData[existingTempleIndex].Date.toLowerCase(), temple.Date)
                     }
@@ -101,21 +109,21 @@ async function scrapeTempleList(url) {
                             recentlyOpenedTemples.push(temple.Name);
                         }
                     }
-                
+
                     // Update the temple data with details if it doesn't have an address in existing data or if the newly scraped data has a valid address
                     if (!existingData[existingTempleIndex].Address || temple.Address) {
                         // console.log('Updating address for:', temple.Name);
                         existingData[existingTempleIndex].Address = temple.Address;
                     }
-                
+
                     // Update the temple date if templeData has a valid date
                     if (temple.Date && temple.Date.toLowerCase() !== 'announced' && temple.Date.toLowerCase() !== 'renovation' && temple.Date.toLowerCase() !== 'construction') {
                         existingData[existingTempleIndex].Date = temple.Date;
                     }
                 }
-                
+
                 // Call scrapeTempleDetails if the temple doesn't have an address
-                if (!existingData[existingTempleIndex].Address) {
+                if (noExisting || !existingData[existingTempleIndex].Address) {
                     console.log('Searching temple details for:', temple.Name);
                     const templeNameSlug = temple.Name.toLowerCase().replace(/\s+/g, '-');
                     const templeDetailsUrl = `https://www.churchofjesuschrist.org/temples/details/${templeNameSlug}?lang=eng`;
@@ -124,7 +132,7 @@ async function scrapeTempleList(url) {
             } else {
                 // console.log('Skipping temple:', temple.Name);
             }
-        }        
+        }
 
         console.log('Number of Utah temples:', utahTempleCount); // Log the number of Utah temples
         console.log('Temples recently opened:', recentlyOpenedTemples.join(', ')); // Log recently opened temples
