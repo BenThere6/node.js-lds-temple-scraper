@@ -8,8 +8,10 @@ async function templeAttender() {
         // Load temple data from temples.json
         const templeData = JSON.parse(fs.readFileSync('temples.json'));
 
-        // Filter temples where SessionAttended is empty
-        const templesToAttend = templeData.filter(temple => temple.SessionAttended === '');
+        // Filter temples where SessionAttended is empty and date is not "Announced", "Construction", or "Renovation"
+        const templesToAttend = templeData.filter(temple => {
+            return temple.SessionAttended === '' && !['Announced', 'Construction', 'Renovation'].includes(temple.Date);
+        });
 
         // Prompt user to mark temples as attended
         const selectedTemple = await inquirer.prompt({
