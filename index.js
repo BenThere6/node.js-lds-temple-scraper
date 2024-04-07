@@ -15,7 +15,7 @@ async function scrape(url) {
 
         console.log('Selectors found, scraping data...');
         
-        const data = await page.evaluate(() => {
+        const newData = await page.evaluate(() => {
             const nameElements = Array.from(document.querySelectorAll('.DataList_templeName__fb4KU'));
             const locElements = Array.from(document.querySelectorAll('.DataList_templeLocation___W0oB'));
             const dateElements = Array.from(document.querySelectorAll('.DataList_dedicated__T01EI'));
@@ -36,11 +36,34 @@ async function scrape(url) {
             }));
         });
 
-        await browser.close();
+        // Check if temples.json file exists
+        const fileExists = fs.existsSync('temples.json');
 
-        const json = JSON.stringify(data, null, 2);
-        fs.writeFileSync('temples.json', json);
-        console.log('Data saved to temples.json');
+        let existingData = [];
+        if (fileExists) {
+            // Read existing data from temples.json file
+            const existingJson = fs.readFileSync('temples.json', 'utf8');
+            existingData = JSON.parse(existingJson);
+        }
+
+        // Filter out temples that already exist in the existingData array
+        const filteredData = newData.filter(temp => {
+            return !existingData.some(existingTemp => existingTemp.Name === temp.Name);
+        });
+
+        if (filteredData.length > 0) {
+            // If there are new temples to add, append them to the existingData array
+            existingData = existingData.concat(filteredData);
+
+            // Write the combined data to temples.json file
+            const json = JSON.stringify(existingData, null, 2);
+            fs.writeFileSync('temples.json', json);
+            console.log('New temples added to temples.json');
+        } else {
+            console.log('No new temples found');
+        }
+
+        await browser.close();
     } catch (error) {
         console.error('An error occurred:', error);
         await browser.close(); // Close the browser in case of error
