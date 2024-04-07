@@ -82,6 +82,7 @@ async function scrapeTempleList(url) {
         } catch {
             console.log('No current temples.json file')
             noExisting = true;
+            existingData = templeData
         }
 
 
@@ -107,6 +108,8 @@ async function scrapeTempleList(url) {
                     if (existingDate != newDate) {
                         if (existingDate == 'renovation' || existingDate == 'construction') {
                             recentlyOpenedTemples.push(temple.Name);
+                            // Update temple date
+                            existingData[existingTempleIndex].Date = temple.Date;
                         }
                     }
 
@@ -114,11 +117,6 @@ async function scrapeTempleList(url) {
                     if (!existingData[existingTempleIndex].Address || temple.Address) {
                         // console.log('Updating address for:', temple.Name);
                         existingData[existingTempleIndex].Address = temple.Address;
-                    }
-
-                    // Update the temple date if templeData has a valid date
-                    if (temple.Date && temple.Date.toLowerCase() !== 'announced' && temple.Date.toLowerCase() !== 'renovation' && temple.Date.toLowerCase() !== 'construction') {
-                        existingData[existingTempleIndex].Date = temple.Date;
                     }
                 }
 
