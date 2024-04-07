@@ -1,21 +1,43 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 
-async function scrape(url) {
-    const browser = await puppeteer.launch({ headless: true }); // Run browser in headless mode
+async function scrapeTempleDetails(url, templeData) {
+    const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
-    
+
     try {
         await page.goto(url);
-        
+
+        const address = await page.evaluate(() => {
+            const addressElement = document.querySelector('.Details_info-item__i8iPw a');
+            return addressElement ? addressElement.textContent.trim() : null;
+        });
+
+        await browser.close();
+
+        // Add the address to the temple data
+        templeData.Address = address;
+    } catch (error) {
+        console.error('An error occurred while scraping temple details:', error);
+        await browser.close();
+    }
+}
+
+async function scrapeTempleList(url) {
+    const browser = await puppeteer.launch({ headless: true });
+    const page = await browser.newPage();
+
+    try {
+        await page.goto(url);
+
         // Wait for the elements to be fully loaded
-        await page.waitForSelector('.DataList_templeName__fb4KU', { timeout: 60000 });
-        await page.waitForSelector('.DataList_templeLocation___W0oB', { timeout: 60000 });
-        await page.waitForSelector('.DataList_dedicated__T01EI', { timeout: 60000 });
+        await page.waitForSelector('.DataList_templeName__fb4KU', { timeout: 30000 });
+        await page.waitForSelector('.DataList_templeLocation___W0oB', { timeout: 30000 });
+        await page.waitForSelector('.DataList_dedicated__T01EI', { timeout: 30000 });
 
         console.log('Selectors found, scraping data...');
-        
-        const newData = await page.evaluate(() => {
+
+        const templeData = await page.evaluate(() => {
             const nameElements = Array.from(document.querySelectorAll('.DataList_templeName__fb4KU'));
             const locElements = Array.from(document.querySelectorAll('.DataList_templeLocation___W0oB'));
             const dateElements = Array.from(document.querySelectorAll('.DataList_dedicated__T01EI'));
@@ -36,34 +58,25 @@ async function scrape(url) {
             }));
         });
 
-        // Check if temples.json file exists
-        const fileExists = fs.existsSync('temples.json');
+        // Iterate through each temple and scrape its details page if it's in Utah
+        for (const temple of templeData) {
+            if (temple.Location && temple.Location.toLowerCase().includes('utah')) {
+                const templeNameSlug = temple.Name.toLowerCase().replace(/\s+/g, '-');
+                const templeDetailsUrl = `https://www.churchofjesuschrist.org/temples/details/${templeNameSlug}?lang=eng`;
 
-        let existingData = [];
-        if (fileExists) {
-            // Read existing data from temples.json file
-            const existingJson = fs.readFileSync('temples.json', 'utf8');
-            existingData = JSON.parse(existingJson);
-        }
+                console.log('Temple details URL:', templeDetailsUrl); // Log the URL
 
-        // Filter out temples that already exist in the existingData array
-        const filteredData = newData.filter(temp => {
-            return !existingData.some(existingTemp => existingTemp.Name === temp.Name);
-        });
-
-        if (filteredData.length > 0) {
-            // If there are new temples to add, append them to the existingData array
-            existingData = existingData.concat(filteredData);
-
-            // Write the combined data to temples.json file
-            const json = JSON.stringify(existingData, null, 2);
-            fs.writeFileSync('temples.json', json);
-            console.log('New temples added to temples.json');
-        } else {
-            console.log('No new temples found');
+                await scrapeTempleDetails(templeDetailsUrl, temple);
+            } else {
+                console.log('Skipping temple outside Utah:', temple.Name);
+            }
         }
 
         await browser.close();
+
+        const json = JSON.stringify(templeData, null, 2);
+        fs.writeFileSync('temples.json', json);
+        console.log('Data saved to temples.json');
     } catch (error) {
         console.error('An error occurred:', error);
         await browser.close(); // Close the browser in case of error
@@ -71,4 +84,4 @@ async function scrape(url) {
 }
 
 const url = 'https://www.lds.org/temples/list?lang=eng';
-scrape(url);
+scrapeTempleList(url);
