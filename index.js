@@ -57,22 +57,30 @@ async function scrapeTempleList(url) {
             const nameElements = Array.from(document.querySelectorAll('.DataList_templeName__fb4KU'));
             const locElements = Array.from(document.querySelectorAll('.DataList_templeLocation___W0oB'));
             const dateElements = Array.from(document.querySelectorAll('.DataList_dedicated__T01EI'));
-
+        
             // Exclude the first entry which represents the column titles
             nameElements.shift();
             locElements.shift();
             dateElements.shift();
-
+        
             const names = nameElements.map(element => element.textContent.trim());
             const locations = locElements.map(element => element.textContent.trim());
             const dates = dateElements.map(element => element.textContent.trim());
-
-            return names.map((name, index) => ({
-                Name: name,
-                Location: locations[index] || null,
-                Date: dates[index] || null
-            }));
-        });
+        
+            // Filter out only the temples located in Utah
+            const utahTemples = names.reduce((acc, name, index) => {
+                if (locations[index] && locations[index].toLowerCase().includes('utah')) {
+                    acc.push({
+                        Name: name,
+                        Location: locations[index] || null,
+                        Date: dates[index] || null
+                    });
+                }
+                return acc;
+            }, []);
+        
+            return utahTemples;
+        });        
 
         // Read existing data from temples.json
         let existingData = []
