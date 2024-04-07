@@ -162,5 +162,8 @@ async function scrapeTempleList(url) {
 }
 
 const url = 'https://www.lds.org/temples/list?lang=eng';
-scrapeTempleList(url);
-// markTemplesAsAttended();
+scrapeTempleList(url).then(() => {
+    markTemplesAsAttended();
+}).catch(error => {
+    console.error('An error occurred while scraping temple list:', error);
+});

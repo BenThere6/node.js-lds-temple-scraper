@@ -1,3 +1,5 @@
+const fs = require('fs');
+
 async function templeAttender() {
     const { default: inquirer } = await import('inquirer');
 
