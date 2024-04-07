@@ -15,8 +15,13 @@ async function scrapeTempleDetails(url, templeData) {
 
         await browser.close();
 
-        // Add the address to the temple data
-        templeData.Address = address;
+        // Format the address
+        if (address) {
+            const formattedAddress = address.replace(/(?<=\d)\s+(?=\D)|(?<=\D)\s+(?=\d)|(?<=\D)(?=[A-Z])/g, ' '); // Replace space between digits and non-digits, between non-digits and digits, and between non-digits and capital letters with a single space
+            templeData.Address = formattedAddress;
+        } else {
+            templeData.Address = null;
+        }
     } catch (error) {
         console.error('An error occurred while scraping temple details:', error);
         await browser.close();
@@ -36,6 +41,8 @@ async function scrapeTempleList(url) {
         await page.waitForSelector('.DataList_dedicated__T01EI', { timeout: 30000 });
 
         console.log('Selectors found, scraping data...');
+
+        let utahTempleCount = 0; // Counter for Utah temples
 
         const templeData = await page.evaluate(() => {
             const nameElements = Array.from(document.querySelectorAll('.DataList_templeName__fb4KU'));
@@ -61,6 +68,7 @@ async function scrapeTempleList(url) {
         // Iterate through each temple and scrape its details page if it's in Utah
         for (const temple of templeData) {
             if (temple.Location && temple.Location.toLowerCase().includes('utah')) {
+                utahTempleCount++; // Increment the counter for Utah temples
                 const templeNameSlug = temple.Name.toLowerCase().replace(/\s+/g, '-');
                 const templeDetailsUrl = `https://www.churchofjesuschrist.org/temples/details/${templeNameSlug}?lang=eng`;
 
@@ -71,6 +79,8 @@ async function scrapeTempleList(url) {
                 console.log('Skipping temple outside Utah:', temple.Name);
             }
         }
+
+        console.log('Number of Utah temples:', utahTempleCount); // Log the number of Utah temples
 
         await browser.close();
 
