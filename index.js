@@ -2,7 +2,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 
 async function scrape(url) {
-    const browser = await puppeteer.launch({ headless: false }); // Open browser in non-headless mode for debugging
+    const browser = await puppeteer.launch({ headless: true }); // Run browser in headless mode
     const page = await browser.newPage();
     
     try {
@@ -19,6 +19,11 @@ async function scrape(url) {
             const nameElements = Array.from(document.querySelectorAll('.DataList_templeName__fb4KU'));
             const locElements = Array.from(document.querySelectorAll('.DataList_templeLocation___W0oB'));
             const dateElements = Array.from(document.querySelectorAll('.DataList_dedicated__T01EI'));
+
+            // Exclude the first entry which represents the column titles
+            nameElements.shift();
+            locElements.shift();
+            dateElements.shift();
 
             const names = nameElements.map(element => element.textContent.trim());
             const locations = locElements.map(element => element.textContent.trim());
