@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
-const markTemplesAsAttended = require('./templeAttender.js');
+const templeAttender = require('./templeAttender.js');
+const { countTotalTemples, countAttendedTemples, countNotAttendedTemples } = require('./templeCounter');
 
 async function scrapeTempleDetails(url, existingData, temple) {
     const browser = await puppeteer.launch({ headless: true });
@@ -51,7 +52,6 @@ async function scrapeTempleList(url) {
 
         console.log('Selectors found, scraping data...');
 
-        let utahTempleCount = 0; // Counter for Utah temples
         const recentlyOpenedTemples = []; // Temples that were recently opened
 
         const templeData = await page.evaluate(() => {
@@ -100,8 +100,6 @@ async function scrapeTempleList(url) {
         // Iterate through each temple
         for (const temple of templeData) {
             if (temple.Location && temple.Location.toLowerCase().includes('utah')) {
-                utahTempleCount++; // Increment the counter for Utah temples
-
                 // Find the corresponding temple in existing data
                 const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
 
@@ -145,7 +143,6 @@ async function scrapeTempleList(url) {
             }
         }
 
-        console.log('Number of Utah temples:', utahTempleCount); // Log the number of Utah temples
         if (recentlyOpenedTemples.length != 0) {
             console.log('Temples recently opened:', recentlyOpenedTemples.join(', ')); // Log recently opened temples
         }
@@ -162,8 +159,15 @@ async function scrapeTempleList(url) {
 }
 
 const url = 'https://www.lds.org/temples/list?lang=eng';
-scrapeTempleList(url).then(() => {
-    markTemplesAsAttended();
-}).catch(error => {
-    console.error('An error occurred while scraping temple list:', error);
-});
+
+scrapeTempleList(url)
+    .then(() => templeAttender())
+    .then(() => {
+        // Log totals after both functions have completed
+        console.log('Total number of temples:', countTotalTemples());
+        console.log('Number of temples attended:', countAttendedTemples());
+        console.log('Number of temples not attended:', countNotAttendedTemples());
+    })
+    .catch(error => {
+        console.error('An error occurred:', error);
+    });
