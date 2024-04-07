@@ -7,6 +7,7 @@ async function scrapeTempleDetails(url, templeData) {
 
     try {
         await page.goto(url);
+        console.log('Searching temple details for:', templeData.Name); // Log when searching temple details
 
         const address = await page.evaluate(() => {
             const addressElement = document.querySelector('.Details_info-item__i8iPw a');
@@ -47,6 +48,7 @@ async function scrapeTempleList(url) {
         console.log('Selectors found, scraping data...');
 
         let utahTempleCount = 0; // Counter for Utah temples
+        const recentlyOpenededTemples = []; // Temples that were recently opened
 
         const templeData = await page.evaluate(() => {
             const nameElements = Array.from(document.querySelectorAll('.DataList_templeName__fb4KU'));
@@ -69,22 +71,32 @@ async function scrapeTempleList(url) {
             }));
         });
 
-        // Iterate through each temple and scrape its details page if it's in Utah and doesn't have an address
+        // Iterate through each temple
         for (const temple of templeData) {
-            if (temple.Location && temple.Location.toLowerCase().includes('utah') && !temple.Address) {
+            if (temple.Location && temple.Location.toLowerCase().includes('utah')) {
                 utahTempleCount++; // Increment the counter for Utah temples
                 const templeNameSlug = temple.Name.toLowerCase().replace(/\s+/g, '-');
                 const templeDetailsUrl = `https://www.churchofjesuschrist.org/temples/details/${templeNameSlug}?lang=eng`;
 
-                console.log('Temple details URL:', templeDetailsUrl); // Log the URL
+                // If the temple previously had 'announced', 'construction', or 'renovation', but now has a date, it's opened opened
+                if ((temple.Date.toLowerCase() === 'announced' || temple.Date.toLowerCase() === 'renovation' || temple.Date.toLowerCase() === 'construction') && temple.Address) {
+                    recentlyOpenededTemples.push(temple.Name);
+                }
 
-                await scrapeTempleDetails(templeDetailsUrl, temple);
+                // Update the temple data with details if it doesn't have an address
+                if (!temple.Address) {
+                    console.log('NOT SKIPPING DETAILS SEARCH FOR:', temple.Name);
+                    await scrapeTempleDetails(templeDetailsUrl, temple);
+                } else {
+                    console.log('Skipping temple details search for:', temple.Name); // Log when skipping temple details search
+                }
             } else {
-                console.log('Skipping temple:', temple.Name);
+                // console.log('Skipping temple:', temple.Name);
             }
         }
 
         console.log('Number of Utah temples:', utahTempleCount); // Log the number of Utah temples
+        console.log('Temples recently opened:', recentlyOpenededTemples.join(', ')); // Log recently dedicated temples
 
         await browser.close();
 
