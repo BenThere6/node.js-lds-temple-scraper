@@ -1,5 +1,6 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const markTemplesAsAttended = require('./templeAttender.js');
 
 async function scrapeTempleDetails(url, existingData, temple) {
     const browser = await puppeteer.launch({ headless: true });
@@ -162,3 +163,4 @@ async function scrapeTempleList(url) {
 
 const url = 'https://www.lds.org/temples/list?lang=eng';
 scrapeTempleList(url);
+// markTemplesAsAttended();
