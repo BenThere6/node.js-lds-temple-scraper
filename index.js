@@ -75,7 +75,7 @@ async function scrapeTempleList(url) {
                         Name: name,
                         Location: locations[index] || null,
                         Date: dates[index] || null,
-                        sessionAttended: sessionAttended
+                        SessionAttended: sessionAttended
                     });
                 }
                 return acc;
@@ -141,13 +141,13 @@ async function scrapeTempleList(url) {
                     const templeDetailsUrl = `https://www.churchofjesuschrist.org/temples/details/${templeNameSlug}?lang=eng`;
                     await scrapeTempleDetails(templeDetailsUrl, existingData, temple); // Pass temple object
                 }
-            } else {
-                // console.log('Skipping temple:', temple.Name);
             }
         }
 
         console.log('Number of Utah temples:', utahTempleCount); // Log the number of Utah temples
-        console.log('Temples recently opened:', recentlyOpenedTemples.join(', ')); // Log recently opened temples
+        if (recentlyOpenedTemples.length != 0) {
+            console.log('Temples recently opened:', recentlyOpenedTemples.join(', ')); // Log recently opened temples
+        }
 
         // Write updated data back to temples.json
         fs.writeFileSync('temples.json', JSON.stringify(existingData, null, 2));
