@@ -39,6 +39,8 @@ async function scrapeTempleDetails(url, existingData, temple) {
 }
 
 async function scrapeTempleList(url) {
+    let noExisting = false;
+    
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
@@ -86,18 +88,28 @@ async function scrapeTempleList(url) {
         });        
 
         // Read existing data from temples.json
-        let existingData = []
-        let noExisting = false;
+        let existingData = [];
+        
         try {
             existingData = JSON.parse(fs.readFileSync('temples.json'));
         } catch {
-            console.log('No current temples.json file')
+            console.log('No current temples.json file or file is empty');
             noExisting = true;
-            existingData = templeData
         }
 
+        // Iterate through each temple in templeData
+        for (const temple of templeData) {
+            // Check if the temple already exists in existingData
+            const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
 
-        // Iterate through each temple
+            // If the temple doesn't exist in existingData, add it
+            if (existingTempleIndex === -1) {
+                console.log('New temple found:', temple.Name);
+                existingData.push(temple);
+            }
+        }
+
+        // Iterate through each temple in templeData
         for (const temple of templeData) {
             if (temple.Location && temple.Location.toLowerCase().includes('utah')) {
                 // Find the corresponding temple in existing data
@@ -156,18 +168,35 @@ async function scrapeTempleList(url) {
         console.error('An error occurred:', error);
         await browser.close(); // Close the browser in case of error
     }
+    return noExisting;
 }
 
 const url = 'https://www.lds.org/temples/list?lang=eng';
 
-scrapeTempleList(url)
-    .then(() => templeAttender())
-    .then(() => {
-        // Log totals after both functions have completed
-        console.log('Total number of temples:', countTotalTemples());
-        console.log('Number of temples attended:', countAttendedTemples());
-        console.log('Number of temples not attended:', countNotAttendedTemples());
+const noExisting = scrapeTempleList(url)
+    .then((noExistingValue) => {
+        if (noExistingValue) {
+            console.log("Run program again to mark temples as attended");
+        } else {
+            // Return the promise returned by templeAttender() so that it can be awaited
+            return templeAttender(); 
+        }
+        return noExistingValue;
+    })
+    .then((noExistingValue) => {
+        if (!noExistingValue) {
+            console.log('Total number of temples:', countTotalTemples());
+            console.log('Number of temples attended:', countAttendedTemples());
+            console.log('Number of temples not attended:', countNotAttendedTemples());
+        }
     })
     .catch(error => {
         console.error('An error occurred:', error);
     });
+
+// Ensure that templeAttender() completes before moving to the next steps
+noExisting.then(() => {
+    // Additional steps after templeAttender() completes
+}).catch(error => {
+    console.error('An error occurred:', error);
+});

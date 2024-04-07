@@ -1,7 +1,13 @@
 const fs = require('fs');
 
 // Read the JSON data from temples.json
-const templeData = JSON.parse(fs.readFileSync('temples.json'));
+let templeData = [];
+try {
+    templeData = JSON.parse(fs.readFileSync('temples.json'));
+} catch {
+    console.log("Will not count, no existing data.")
+}
+
 
 // Function to count the total number of temples
 function countTotalTemples() {
