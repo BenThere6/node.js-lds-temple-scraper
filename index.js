@@ -10,15 +10,19 @@ async function scrapeTempleDetails(url, templeData) {
 
         const address = await page.evaluate(() => {
             const addressElement = document.querySelector('.Details_info-item__i8iPw a');
-            return addressElement ? addressElement.textContent.trim() : null;
+            if (addressElement) {
+                // Extract the inner text and replace <br> tags with spaces
+                return addressElement.innerText.replace(/<br>/g, ' ');
+            } else {
+                return null;
+            }
         });
 
         await browser.close();
 
         // Format the address
         if (address) {
-            const formattedAddress = address.replace(/(?<=\d)\s+(?=\D)|(?<=\D)\s+(?=\d)|(?<=\D)(?=[A-Z])/g, ' '); // Replace space between digits and non-digits, between non-digits and digits, and between non-digits and capital letters with a single space
-            templeData.Address = formattedAddress;
+            templeData.Address = address.trim().replace(/\n/g, ', '); // Replace newline characters with ', '
         } else {
             templeData.Address = null;
         }
