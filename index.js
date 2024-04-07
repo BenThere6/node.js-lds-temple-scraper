@@ -107,8 +107,6 @@ async function scrapeTempleList(url) {
                     if ((existingData[existingTempleIndex].Date.toLowerCase() === 'announced' || existingData[existingTempleIndex].Date.toLowerCase() === 'renovation' || existingData[existingTempleIndex].Date.toLowerCase() === 'construction') &&
                         (temple.Date && temple.Date.toLowerCase() !== 'announced' && temple.Date.toLowerCase() !== 'renovation' && temple.Date.toLowerCase() !== 'construction') && temple.Address) {
                         recentlyOpenedTemples.push(temple.Name);
-                    } else {
-                        // console.log(temple.Name, existingData[existingTempleIndex].Date.toLowerCase(), temple.Date)
                     }
 
                     const existingDate = existingData[existingTempleIndex].Date.toLowerCase().trim()
@@ -125,6 +123,12 @@ async function scrapeTempleList(url) {
                     if (!existingData[existingTempleIndex].Address || temple.Address) {
                         // console.log('Updating address for:', temple.Name);
                         existingData[existingTempleIndex].Address = temple.Address;
+                    }
+
+                    // Update the temple data with details if it doesn't have a location in existing data or if the newly scraped data has a valid location
+                    if (!existingData[existingTempleIndex].Location || temple.Location) {
+                        // console.log('Updating address for:', temple.Name);
+                        existingData[existingTempleIndex].Location = temple.Location;
                     }
                 }
 
