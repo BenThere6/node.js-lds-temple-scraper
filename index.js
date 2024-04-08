@@ -1,6 +1,7 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const templeAttender = require('./templeAttender.js');
+const templeSelector = require('./templeSelector.js');
 
 async function scrapeTempleDetails(url, existingData, temple) {
     const browser = await puppeteer.launch({ headless: true });
@@ -177,7 +178,7 @@ const url = 'https://www.lds.org/temples/list?lang=eng';
 const noExisting = scrapeTempleList(url)
     .then((noExistingValue) => {
         if (noExistingValue) {
-            console.log("Run program again to mark temples as attended");
+            console.log("Run program again to mark temples as attended, or to choose next temple");
         } else {
             // Return the promise returned by templeAttender() so that it can be awaited
             return templeAttender();
@@ -196,6 +197,8 @@ const noExisting = scrapeTempleList(url)
             console.log('Total number of temples:', templeData.length);
             console.log('Number of temples attended:', templeData.filter(temple => temple.SessionAttended === 'true').length);
             console.log('Number of temples not attended:', templeData.filter(temple => temple.SessionAttended !== 'true').length);
+
+            return templeSelector();
         }
     })
     .catch(error => {

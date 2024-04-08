@@ -1,6 +1,8 @@
 const fs = require('fs');
+const distanceCalculator = require('./distanceCalculator.js');
 
 async function selectTempleToAttend() {
+    distanceCalculator()
     const inquirer = (await import('inquirer')).default;
 
     // Read temple data from JSON file
@@ -35,7 +37,7 @@ async function selectTempleToAttend() {
     }
 
     // Calculate the maximum distance across all temples in filtered data
-    const maxMiles = Math.max(...filteredTempleData.map(temple => parseFloat(temple.Distance)));
+    // const maxMiles = Math.max(...filteredTempleData.map(temple => parseFloat(temple.Distance)));
 
     // Determine the number of scale options based on the number of available temples
     const scaleOptions = Math.min(numTemples, 5);
@@ -68,5 +70,4 @@ async function selectTempleToAttend() {
     };
 }
 
-selectTempleToAttend();
 module.exports = selectTempleToAttend;

@@ -48,7 +48,7 @@ async function calculateTempleDistances() {
             for (const temple of templeData) {
                 if (temple.Address) {
                     const distance = await calculateDistance(cityResponse.city, temple.Address);
-                    temple.Distance = `${distance.toFixed(2)}`;
+                    temple.Distance = `${Math.round(distance)}`;
                     // Add a delay to avoid rate limiting
                     await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
                 }
@@ -87,5 +87,8 @@ async function calculateTempleDistances() {
         console.error(error.message);
     }
 }
+
+// Call the function to initiate distance calculation when this module is required
+calculateTempleDistances();
 
 module.exports = calculateTempleDistances;
