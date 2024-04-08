@@ -9,8 +9,8 @@ async function selectTempleToAttend() {
         message: 'Do you want to select a temple to attend?'
     });
 
-    if (!response) {
-        return
+    if (!response.selectTemple) {
+        return;
     }
 
     // Read temple data from JSON file
@@ -43,9 +43,6 @@ async function selectTempleToAttend() {
         groups.push(group);
         startIndex += groupSize;
     }
-
-    // Calculate the maximum distance across all temples in filtered data
-    // const maxMiles = Math.max(...filteredTempleData.map(temple => parseFloat(temple.Distance)));
 
     // Determine the number of scale options based on the number of available temples
     const scaleOptions = Math.min(numTemples, 5);
