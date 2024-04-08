@@ -69,6 +69,7 @@ async function scrapeTempleList(url) {
             const locations = locElements.map(element => element.textContent.trim());
             const dates = dateElements.map(element => element.textContent.trim());
             const sessionAttended = "";
+            const distance = "";
 
             // Filter out only the temples located in Utah
             const utahTemples = names.reduce((acc, name, index) => {
@@ -77,7 +78,8 @@ async function scrapeTempleList(url) {
                         Name: name,
                         Location: locations[index] || null,
                         Date: dates[index] || null,
-                        SessionAttended: sessionAttended
+                        SessionAttended: sessionAttended,
+                        Distance: distance
                     });
                 }
                 return acc;
