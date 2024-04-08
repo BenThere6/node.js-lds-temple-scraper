@@ -8,17 +8,12 @@ The Utah Temple Challenge is a Node.js application designed for participants of 
 
 ## Table of Contents
 
-* [Project Information](#project-information)<br>
 * [Installation](#installation)<br>
 * [Usage](#usage)<br>
 * [Features](#features)<br>
 * [Contributing](#contributing)<br>
 * [Contact Information](#contact-information)<br>
 * [License](#license)
-
-## Project Information
-
-This project is developed as part of a school assignment for Rutgers University. While external contributions are not expected, this repository serves as a demonstration of my understanding of the concepts covered in the course.
 
 ## Installation
 
