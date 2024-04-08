@@ -1,9 +1,7 @@
 const fs = require('fs');
-const distanceCalculator = require('./distanceCalculator.js');
 
 async function selectTempleToAttend() {
     const inquirer = (await import('inquirer')).default;
-    distanceCalculator()
 
     const response = await inquirer.prompt({
         type: 'confirm',
