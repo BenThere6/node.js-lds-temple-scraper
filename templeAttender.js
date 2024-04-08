@@ -26,10 +26,10 @@ async function templeAttender() {
                     type: 'list',
                     name: 'temple',
                     message: 'Select a temple to mark as attended:',
-                    choices: templesToAttend.map(temple => temple.Name).concat('No more temples')
+                    choices: templesToAttend.map(temple => temple.Name).concat('Exit')
                 });
 
-                if (selectedTemple.temple === 'No more temples') {
+                if (selectedTemple.temple === 'Exit') {
                     console.log('Exiting temple attendance marking.');
                     return;
                 }

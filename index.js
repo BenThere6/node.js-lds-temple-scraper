@@ -1,7 +1,6 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
 const templeAttender = require('./templeAttender.js');
-const { countTotalTemples, countAttendedTemples, countNotAttendedTemples } = require('./templeCounter');
 
 async function scrapeTempleDetails(url, existingData, temple) {
     const browser = await puppeteer.launch({ headless: true });
