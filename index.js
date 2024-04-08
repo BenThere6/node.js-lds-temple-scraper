@@ -40,7 +40,7 @@ async function scrapeTempleDetails(url, existingData, temple) {
 
 async function scrapeTempleList(url) {
     let noExisting = false;
-    
+
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
@@ -60,17 +60,17 @@ async function scrapeTempleList(url) {
             const nameElements = Array.from(document.querySelectorAll('.DataList_templeName__fb4KU'));
             const locElements = Array.from(document.querySelectorAll('.DataList_templeLocation___W0oB'));
             const dateElements = Array.from(document.querySelectorAll('.DataList_dedicated__T01EI'));
-        
+
             // Exclude the first entry which represents the column titles
             nameElements.shift();
             locElements.shift();
             dateElements.shift();
-        
+
             const names = nameElements.map(element => element.textContent.trim());
             const locations = locElements.map(element => element.textContent.trim());
             const dates = dateElements.map(element => element.textContent.trim());
             const sessionAttended = "";
-        
+
             // Filter out only the temples located in Utah
             const utahTemples = names.reduce((acc, name, index) => {
                 if (locations[index] && locations[index].toLowerCase().includes('utah')) {
@@ -83,13 +83,13 @@ async function scrapeTempleList(url) {
                 }
                 return acc;
             }, []);
-        
+
             return utahTemples;
-        });        
+        });
 
         // Read existing data from temples.json
         let existingData = [];
-        
+
         try {
             existingData = JSON.parse(fs.readFileSync('temples.json'));
         } catch {
@@ -179,15 +179,22 @@ const noExisting = scrapeTempleList(url)
             console.log("Run program again to mark temples as attended");
         } else {
             // Return the promise returned by templeAttender() so that it can be awaited
-            return templeAttender(); 
+            return templeAttender();
         }
         return noExistingValue;
     })
     .then((noExistingValue) => {
         if (!noExistingValue) {
-            console.log('Total number of temples:', countTotalTemples());
-            console.log('Number of temples attended:', countAttendedTemples());
-            console.log('Number of temples not attended:', countNotAttendedTemples());
+            let templeData = [];
+            try {
+                templeData = JSON.parse(fs.readFileSync('temples.json'));
+            } catch {
+                console.log("Will not count, no existing data.")
+            }
+
+            console.log('Total number of temples:', templeData.length);
+            console.log('Number of temples attended:', templeData.filter(temple => temple.SessionAttended === 'true').length);
+            console.log('Number of temples not attended:', templeData.filter(temple => temple.SessionAttended !== 'true').length);
         }
     })
     .catch(error => {
