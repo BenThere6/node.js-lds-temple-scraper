@@ -2,7 +2,13 @@ const axios = require('axios');
 const fs = require('fs');
 require('dotenv').config();
 
-const templeData = JSON.parse(fs.readFileSync('temples.json'));
+let templeData;
+try {
+    templeData = JSON.parse(fs.readFileSync('temples.json'));
+} catch {
+    templeData = [];
+}
+
 const apiKey = process.env.API_KEY;
 
 async function calculateDistance(origin, destination) {
