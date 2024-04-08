@@ -72,12 +72,11 @@ To use the Utah Temple Challenge, follow these steps:
 
 Contributions to the Utah Temple Challenge project are welcome! To contribute, follow these steps:
 
-Fork the repository.
-Create a new branch (git checkout -b feature/yourfeature).
-Make your changes.
-Commit your changes (git commit -am 'Add new feature').
-Push to the branch (git push origin feature/yourfeature).
-Create a new Pull Request.
+1. Create a new branch (git checkout -b feature/yourfeature).
+2. Make your changes.
+3. Commit your changes (git commit -m 'Add new feature').
+4. Push to the branch (git push origin feature/yourfeature).
+5. Create a new Pull Request.
 
 ## Contact Information
 
