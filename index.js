@@ -2,6 +2,7 @@ const puppeteer = require('puppeteer');
 const fs = require('fs');
 const templeAttender = require('./templeAttender.js');
 const templeSelector = require('./templeSelector.js');
+const distanceCalculator = require('./distanceCalculator.js');
 
 async function scrapeTempleDetails(url, existingData, temple) {
     const browser = await puppeteer.launch({ headless: true });
@@ -193,17 +194,25 @@ const noExisting = scrapeTempleList(url)
             } catch {
                 console.log("Will not count, no existing data.")
             }
-
+    
             console.log('Total number of temples:', templeData.length);
             console.log('Number of temples attended:', templeData.filter(temple => temple.SessionAttended === 'true').length);
             console.log('Number of temples not attended:', templeData.filter(temple => temple.SessionAttended !== 'true').length);
-
-            return templeSelector();
+    
+            // Call distanceCalculator
+            distanceCalculator()
+                .then(() => {
+                    // After distanceCalculator completes, call templeSelector
+                    return templeSelector();
+                })
+                .catch(error => {
+                    console.error('An error occurred:', error);
+                });
         }
     })
     .catch(error => {
         console.error('An error occurred:', error);
-    });
+    });    
 
 // Ensure that templeAttender() completes before moving to the next steps
 noExisting.then(() => {

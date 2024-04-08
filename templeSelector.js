@@ -2,8 +2,18 @@ const fs = require('fs');
 const distanceCalculator = require('./distanceCalculator.js');
 
 async function selectTempleToAttend() {
-    distanceCalculator()
     const inquirer = (await import('inquirer')).default;
+    distanceCalculator()
+
+    const response = await inquirer.prompt({
+        type: 'confirm',
+        name: 'selectTemple',
+        message: 'Do you want to select a temple to attend?'
+    });
+
+    if (!response) {
+        return
+    }
 
     // Read temple data from JSON file
     const templeData = JSON.parse(fs.readFileSync('temples.json'));
@@ -63,11 +73,6 @@ async function selectTempleToAttend() {
     Name: ${randomTemple.Name}
     Address: ${randomTemple.Address}
     Distance: ${randomTemple.Distance} miles`);
-
-    return {
-        name: randomTemple.Name,
-        distance: randomTemple.Distance
-    };
 }
 
 module.exports = selectTempleToAttend;

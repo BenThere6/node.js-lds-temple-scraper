@@ -60,7 +60,8 @@ async function calculateTempleDistances() {
             const response = await inquirer.prompt({
                 type: 'confirm',
                 name: 'recalculate',
-                message: 'All temple distances are already calculated. Do you want to recalculate distances from a different city?'
+                message: 'All temple distances are already calculated. Do you want to recalculate distances from a different city?',
+                default: false
             });
 
             if (response.recalculate) {
@@ -87,8 +88,5 @@ async function calculateTempleDistances() {
         console.error(error.message);
     }
 }
-
-// Call the function to initiate distance calculation when this module is required
-calculateTempleDistances();
 
 module.exports = calculateTempleDistances;
