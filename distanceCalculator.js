@@ -1,0 +1,68 @@
+const axios = require('axios');
+const fs = require('fs');
+
+const templeData = JSON.parse(fs.readFileSync('temples.json'));
+
+async function calculateDistance(origin, destination) {
+    try {
+        const response = await axios.get('https://api.distancematrix.ai/maps/api/distancematrix/json', {
+            params: {
+                origins: `${origin}, Utah, USA`,
+                destinations: destination,
+                key: 'JVpi2Ay960RXAgq56NqXbQncMkyejDHZBtxo53D6GRMaYm2mrgUMwuF3Kjxzt4gg'
+            }
+        });
+
+        console.log(response.data); // Log the response data for inspection
+
+        if (response.data.status === 'OK') {
+            const distance = response.data.rows[0].elements[0].distance.text;
+            return parseFloat(distance.replace(' km', '')) * 0.621371; // Convert km to miles
+        } else {
+            throw new Error('Error calculating distance: ' + response.data.error_message);
+        }
+    } catch (error) {
+        throw new Error('Error calculating distance: ' + error.message);
+    }
+}
+
+async function calculateTempleDistances() {
+    const inquirer = (await import('inquirer')).default;
+    try {
+        let cityNeeded = false;
+
+        for (const temple of templeData) {
+            if (temple.Address && temple.Distance === '') {
+                cityNeeded = true;
+                break;
+            }
+        }
+
+        if (cityNeeded) {
+            const cityResponse = await inquirer.prompt({
+                type: 'input',
+                name: 'city',
+                message: 'Enter your city:'
+            });
+
+            for (const temple of templeData) {
+                if (temple.Address && temple.Distance === '') {
+                    const distance = await calculateDistance(cityResponse.city, temple.Address);
+                    temple.Distance = `${distance.toFixed(2)}`;
+                    // Add a delay to avoid rate limiting
+                    await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
+                }
+            }
+
+            fs.writeFileSync('temples.json', JSON.stringify(templeData, null, 2));
+            console.log('Distance data updated successfully.');
+        } else {
+            console.log('All temple distances are already calculated.');
+        }
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+calculateTempleDistances();
+module.exports = calculateTempleDistances;

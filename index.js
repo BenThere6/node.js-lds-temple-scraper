@@ -26,7 +26,7 @@ async function scrapeTempleDetails(url, existingData, temple) {
             // Find the corresponding temple in existing data
             const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
             if (existingTempleIndex !== -1 && !existingData[existingTempleIndex].Address) { // Check if the address is not already updated
-                console.log('Updating address for:', temple.Name);
+                // console.log('Updating address for:', temple.Name);
                 existingData[existingTempleIndex].Address = address.trim().replace(/\n/g, ', '); // Replace newline characters with ', '
             }
         }
