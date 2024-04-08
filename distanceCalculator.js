@@ -29,16 +29,16 @@ async function calculateDistance(origin, destination) {
 async function calculateTempleDistances() {
     const inquirer = (await import('inquirer')).default;
     try {
-        let cityNeeded = false;
+        let anyTempleNeedsDistance = false;
 
         for (const temple of templeData) {
             if (temple.Address && temple.Distance === '') {
-                cityNeeded = true;
+                anyTempleNeedsDistance = true;
                 break;
             }
         }
 
-        if (cityNeeded) {
+        if (anyTempleNeedsDistance) {
             const cityResponse = await inquirer.prompt({
                 type: 'input',
                 name: 'city',
@@ -46,7 +46,7 @@ async function calculateTempleDistances() {
             });
 
             for (const temple of templeData) {
-                if (temple.Address && temple.Distance === '') {
+                if (temple.Address) {
                     const distance = await calculateDistance(cityResponse.city, temple.Address);
                     temple.Distance = `${distance.toFixed(2)}`;
                     // Add a delay to avoid rate limiting
@@ -74,8 +74,6 @@ async function calculateTempleDistances() {
                     if (temple.Address) {
                         const distance = await calculateDistance(cityResponse.city, temple.Address);
                         temple.Distance = `${distance.toFixed(2)}`;
-                        // Add a delay to avoid rate limiting
-                        await new Promise(resolve => setTimeout(resolve, 1000)); // 1 second delay
                     }
                 }
 
@@ -90,5 +88,4 @@ async function calculateTempleDistances() {
     }
 }
 
-calculateTempleDistances();
 module.exports = calculateTempleDistances;
