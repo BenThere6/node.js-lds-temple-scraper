@@ -10,7 +10,7 @@ async function selectTempleToAttend() {
     const filteredTempleData = templeData.filter(temple => {
         const date = temple.Date.toLowerCase();
         return !(date.includes('announced') || date.includes('construction') || date.includes('renovation'));
-    });
+    }).filter(temple => typeof temple.Distance === 'string' && temple.Distance.trim() !== '');
 
     // Sort filtered temples by distance
     filteredTempleData.sort((a, b) => parseFloat(a.Distance) - parseFloat(b.Distance));
@@ -34,17 +34,20 @@ async function selectTempleToAttend() {
         startIndex += groupSize;
     }
 
-    console.log(groups)
+    console.log(groups);
 
     // Calculate the maximum distance across all temples in filtered data
     const maxMiles = Math.max(...filteredTempleData.map(temple => parseFloat(temple.Distance)));
+
+    // Determine the number of scale options based on the number of available temples
+    const scaleOptions = Math.min(numTemples, 5);
 
     // Prompt user to choose a distance scale
     const answers = await inquirer.prompt({
         type: 'list',
         name: 'distanceScale',
-        message: 'Choose a distance scale (1-5):',
-        choices: Array.from({ length: 5 }, (_, i) => {
+        message: `Choose a distance scale (1-${scaleOptions}):`,
+        choices: Array.from({ length: scaleOptions }, (_, i) => {
             return {
                 name: `Scale ${i + 1} (Max miles: ${Math.max(...groups[i].map(temple => parseFloat(temple.Distance)))})`,
                 value: i
