@@ -23,10 +23,10 @@ This project is developed as part of a school assignment for Rutgers University.
 ## Installation
 
 ### Prerequisites
-Before installing the LDS Temple Scraper, ensure you have the following installed:
+Before installing the Utah Temple Challenge, ensure you have the following installed:
 * [Node.js](https://nodejs.org/en) - JavaScript runtime environment
 
-### Installing the LDS Temple Scraper
+### Installing the Utah Temple Challenge
 1. Clone the repository to your local machine: <br>
 `git clone https://github.com/BenThere6/utah-temple-challenge.git`<br>
 
@@ -38,14 +38,31 @@ Before installing the LDS Temple Scraper, ensure you have the following installe
 
 ## Usage
 
-To use the LDS Temple Scraper, follow these steps:
+To use the Utah Temple Challenge, follow these steps:
 
-1. Run the application by executing the following command in your terminal:
-`node index`
+1. **Get an API Key from DistanceMatrix.ai:**
+* Go to [DistanceMatrix.ai](DistanceMatrix.ai)
+* Create a free account or log in if you already have one.
+* Navigate to your dashboard
+* Copy the API key for 'Distancematrix accurate application'
 
-2. Follow the on-screen prompts to select options and interact with the application.
+2. **Create a .env file:**
+* In the root directory of the project, create a file named `.env`.
+* Open the .env file in a text editor.
 
-3. The application will scrape temple data, calculate distances, and allow you to select a temple to attend.
+3. **Set up environment variables:**
+* Inside the .env file, add the following line:<br>
+`API_KEY=YOUR_API_KEY`<br>
+Replace YOUR_API_KEY with the API key you obtained from DistanceMatrix.ai.
+
+4. **Run the application:**
+* Open your terminal.
+* Navigate to the root directory of the project.
+* Execute the following command:<br>
+`node index`<br>
+
+5. **Follow the on-screen prompts:**
+* Interact with the application as it guides you through scraping temple data, calculating distances, and selecting a temple to attend.
 
 ## Features
 
@@ -56,7 +73,7 @@ To use the LDS Temple Scraper, follow these steps:
 
 ## Contributing
 
-Contributions to the LDS Temple Scraper project are welcome! To contribute, follow these steps:
+Contributions to the Utah Temple Challenge project are welcome! To contribute, follow these steps:
 
 Fork the repository.
 Create a new branch (git checkout -b feature/yourfeature).
