@@ -34,8 +34,6 @@ async function selectTempleToAttend() {
         startIndex += groupSize;
     }
 
-    console.log(groups);
-
     // Calculate the maximum distance across all temples in filtered data
     const maxMiles = Math.max(...filteredTempleData.map(temple => parseFloat(temple.Distance)));
 
@@ -57,6 +55,12 @@ async function selectTempleToAttend() {
 
     const selectedGroup = groups[answers.distanceScale];
     const randomTemple = selectedGroup[Math.floor(Math.random() * selectedGroup.length)];
+
+    // Log the selected temple's information
+    console.log(`Selected Temple:
+    Name: ${randomTemple.Name}
+    Address: ${randomTemple.Address}
+    Distance: ${randomTemple.Distance} miles`);
 
     return {
         name: randomTemple.Name,
