@@ -4,7 +4,7 @@
   
 ## Description
   
-The Utah Temple Challenge is a Node.js application designed for participants of the challenge to attend every temple in Utah. This application utilizes web scraping techniques to gather up-to-date information about the temples from the official website of the Church of Jesus Christ of Latter-day Saints. It provides users with essential data such as temple locations, dedication dates, and distances from a specified city.
+The Utah Temple Challenge is a Node.js application designed for participants of the challenge to attend every temple in Utah. This application utilizes web scraping techniques to gather up-to-date information about the temples from the official website of the Church of Jesus Christ of Latter-day Saints. It provides users with essential data such as temple locations, dedication dates, and distances from a specified city, and keeps track of which temples have been attended, and how many are left.
 
 ## Table of Contents
 
@@ -70,6 +70,8 @@ To use the Utah Temple Challenge, follow these steps:
 * Calculates distances between temples and a specified city using the Google Maps Distance Matrix API.
 * Allows users to select a temple to attend based on proximity.
 * Supports customization of distance scale and other preferences.
+* Keeps track of temples that have been attended
+* Counts remaing temples to attend
 
 ## Contributing
 
