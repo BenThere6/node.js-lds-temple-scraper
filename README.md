@@ -62,7 +62,7 @@ To use the Utah Temple Challenge, follow these steps:
 ## Features
 
 * Scrapes temple data from the official website of the Church of Jesus Christ of Latter-day Saints.
-* Calculates distances between temples and a specified city using the Google Maps Distance Matrix API.
+* Calculates distances between temples and a specified city using the Matrix Distance API.
 * Allows users to select a temple to attend based on proximity.
 * Supports customization of distance scale and other preferences.
 * Keeps track of temples that have been attended
