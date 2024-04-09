@@ -60,7 +60,7 @@ async function calculateTempleDistances() {
             });
 
             const progressBar = new SingleBar({
-                format: '{bar} {percentage}% | ETA: {eta}s | {value}/{total} | Searching temple details: {detail}',
+                format: '{bar} {percentage}% | ETA: {eta}s | {value}/{total}',
                 barCompleteChar: '\u2588',
                 barIncompleteChar: '\u2591',
                 hideCursor: true

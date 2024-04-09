@@ -41,6 +41,7 @@ async function scrapeTempleDetails(url, existingData, temple, progressBar) {
 
 async function scrapeTempleList(url) {
     let noExisting = false;
+    let recentlyOpenedTemples = []
 
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -51,8 +52,6 @@ async function scrapeTempleList(url) {
         await page.waitForSelector('.DataList_templeName__fb4KU', { timeout: 30000 });
         await page.waitForSelector('.DataList_templeLocation___W0oB', { timeout: 30000 });
         await page.waitForSelector('.DataList_dedicated__T01EI', { timeout: 30000 });
-
-        console.log('Selectors found, scraping data...');
 
         const templeData = await page.evaluate(() => {
             const nameElements = Array.from(document.querySelectorAll('.DataList_templeName__fb4KU'));
@@ -94,14 +93,6 @@ async function scrapeTempleList(url) {
             noExisting = true;
         }
 
-        const progressBar = new SingleBar({
-            format: '{bar} {percentage}% | ETA: {eta}s | {value}/{total} | Searching temple details: {detail}',
-            barCompleteChar: '\u2588',
-            barIncompleteChar: '\u2591',
-            hideCursor: true
-        });
-        progressBar.start(templeData.length, 0, { detail: '' });
-
         let newTemplesCount = 0;
 
         for (const temple of templeData) {
@@ -116,6 +107,15 @@ async function scrapeTempleList(url) {
         if (newTemplesCount > 0) {
             console.log("New temples found:", newTemplesCount);
         }
+
+        const progressBar = new SingleBar({
+            format: '{bar} {percentage}% | ETA: {eta}s | {value}/{total}',
+            barCompleteChar: '\u2588',
+            barIncompleteChar: '\u2591',
+            hideCursor: true
+        });
+        
+        let progressCount = 0;
 
         for (const temple of templeData) {
             let recentlyOpened = false;
@@ -133,6 +133,52 @@ async function scrapeTempleList(url) {
                     if (existingDate != newDate) {
                         if (existingDate == 'renovation' || existingDate == 'construction') {
                             recentlyOpened = true;
+                        }
+                    }
+
+                    if (!existingData[existingTempleIndex].Address || temple.Address) {
+                        existingData[existingTempleIndex].Address = temple.Address;
+                    }
+
+                    if (!existingData[existingTempleIndex].Location || temple.Location) {
+                        existingData[existingTempleIndex].Location = temple.Location;
+                    }
+                }
+
+                let authorizeSearch = false;
+                if (recentlyOpened && !existingData[existingTempleIndex].Address) {
+                    authorizeSearch = true;
+                }
+
+                if (noExisting || authorizeSearch) {
+                    progressCount ++;
+                }
+            }
+        }
+
+        if (progressCount) {
+            console.log('Downloading temple addresses...')
+            progressBar.start(progressCount, 0, { detail: '' });
+        }
+
+        for (const temple of templeData) {
+            let recentlyOpened = false;
+            if (temple.Location && temple.Location.toLowerCase().includes('utah')) {
+                const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
+
+                if (existingTempleIndex !== -1) {
+                    if ((existingData[existingTempleIndex].Date.toLowerCase() === 'announced' || existingData[existingTempleIndex].Date.toLowerCase() === 'renovation' || existingData[existingTempleIndex].Date.toLowerCase() === 'construction') &&
+                        (temple.Date && temple.Date.toLowerCase() !== 'announced' && temple.Date.toLowerCase() !== 'renovation' && temple.Date.toLowerCase() !== 'construction') && temple.Address) {
+                        recentlyOpened = true;
+                        recentlyOpenedTemples.push(temple.Name);
+                    }
+
+                    const existingDate = existingData[existingTempleIndex].Date.toLowerCase().trim()
+                    const newDate = temple.Date.toLowerCase().trim()
+                    if (existingDate != newDate) {
+                        if (existingDate == 'renovation' || existingDate == 'construction') {
+                            recentlyOpened = true;
+                            recentlyOpenedTemples.push(temple.Name);
                             existingData[existingTempleIndex].Date = temple.Date;
                         }
                     }
@@ -160,10 +206,6 @@ async function scrapeTempleList(url) {
         }
 
         progressBar.stop();
-
-        if (noExisting) {
-            console.log('Run program again to mark temples as attended, or to choose next temple');
-        }
 
         if (recentlyOpenedTemples.length != 0) {
             console.log('Temples recently opened:', recentlyOpenedTemples.join(', '));
