@@ -60,7 +60,10 @@ async function calculateTempleDistances() {
             });
 
             const progressBar = new SingleBar({
-                format: '{bar} {percentage}% | ETA: {eta}s | {value}/{total}'
+                format: '{bar} {percentage}% | ETA: {eta}s | {value}/{total} | Searching temple details: {detail}',
+                barCompleteChar: '\u2588',
+                barIncompleteChar: '\u2591',
+                hideCursor: true
             });
             console.log("Downloading distance data...")
             progressBar.start(totalRequests, 0); // Start progress bar with total number of requests
