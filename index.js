@@ -1,12 +1,13 @@
 const puppeteer = require('puppeteer');
 const fs = require('fs');
+const { SingleBar } = require('cli-progress');
 const templeAttender = require('./templeAttender.js');
 const templeSelector = require('./templeSelector.js');
 const distanceCalculator = require('./distanceCalculator.js');
 
 let challengeComplete = false;
 
-async function scrapeTempleDetails(url, existingData, temple) {
+async function scrapeTempleDetails(url, existingData, temple, progressBar) {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
 
@@ -16,7 +17,6 @@ async function scrapeTempleDetails(url, existingData, temple) {
         const address = await page.evaluate(() => {
             const addressElement = document.querySelector('.Details_info-item__i8iPw a');
             if (addressElement) {
-                // Extract the inner text and replace <br> tags with spaces
                 return addressElement.innerText.replace(/<br>/g, ' ');
             } else {
                 return null;
@@ -25,16 +25,14 @@ async function scrapeTempleDetails(url, existingData, temple) {
 
         await browser.close();
 
-        // Format the address
         if (address) {
-            // Find the corresponding temple in existing data
             const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
-            if (existingTempleIndex !== -1 && !existingData[existingTempleIndex].Address) { // Check if the address is not already updated
-                // console.log('Updating address for:', temple.Name);
-                existingData[existingTempleIndex].Address = address.trim().replace(/\n/g, ', '); // Replace newline characters with ', '
+            if (existingTempleIndex !== -1 && !existingData[existingTempleIndex].Address) {
+                existingData[existingTempleIndex].Address = address.trim().replace(/\n/g, ', ');
             }
         }
 
+        progressBar.increment();
     } catch (error) {
         console.error('An error occurred while scraping temple details:', error);
         await browser.close();
@@ -50,21 +48,17 @@ async function scrapeTempleList(url) {
     try {
         await page.goto(url);
 
-        // Wait for the elements to be fully loaded
         await page.waitForSelector('.DataList_templeName__fb4KU', { timeout: 30000 });
         await page.waitForSelector('.DataList_templeLocation___W0oB', { timeout: 30000 });
         await page.waitForSelector('.DataList_dedicated__T01EI', { timeout: 30000 });
 
         console.log('Selectors found, scraping data...');
 
-        const recentlyOpenedTemples = []; // Temples that were recently opened
-
         const templeData = await page.evaluate(() => {
             const nameElements = Array.from(document.querySelectorAll('.DataList_templeName__fb4KU'));
             const locElements = Array.from(document.querySelectorAll('.DataList_templeLocation___W0oB'));
             const dateElements = Array.from(document.querySelectorAll('.DataList_dedicated__T01EI'));
 
-            // Exclude the first entry which represents the column titles
             nameElements.shift();
             locElements.shift();
             dateElements.shift();
@@ -75,7 +69,6 @@ async function scrapeTempleList(url) {
             const sessionAttended = "";
             const distance = "";
 
-            // Filter out only the temples located in Utah
             const utahTemples = names.reduce((acc, name, index) => {
                 if (locations[index] && locations[index].toLowerCase().includes('utah')) {
                     acc.push({
@@ -92,7 +85,6 @@ async function scrapeTempleList(url) {
             return utahTemples;
         });
 
-        // Read existing data from temples.json
         let existingData = [];
 
         try {
@@ -102,36 +94,37 @@ async function scrapeTempleList(url) {
             noExisting = true;
         }
 
-        // Iterate through each temple in templeData
+        const progressBar = new SingleBar({
+            format: '{bar} {percentage}% | ETA: {eta}s | {value}/{total} | Searching temple details: {detail}',
+            barCompleteChar: '\u2588',
+            barIncompleteChar: '\u2591',
+            hideCursor: true
+        });
+        progressBar.start(templeData.length, 0, { detail: '' });
+
         let newTemplesCount = 0;
+
         for (const temple of templeData) {
-            // Check if the temple already exists in existingData
             const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
 
-            // If the temple doesn't exist in existingData, add it
             if (existingTempleIndex === -1) {
-                // console.log('New temple found:', temple.Name);
-                newTemplesCount ++;
+                newTemplesCount++;
                 existingData.push(temple);
             }
         }
 
         if (newTemplesCount > 0) {
-            console.log("New temples found:", newTemplesCount)
+            console.log("New temples found:", newTemplesCount);
         }
 
-        // Iterate through each temple in templeData
         for (const temple of templeData) {
             let recentlyOpened = false;
             if (temple.Location && temple.Location.toLowerCase().includes('utah')) {
-                // Find the corresponding temple in existing data
                 const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
 
                 if (existingTempleIndex !== -1) {
-                    // If the temple previously had 'announced', 'renovation', or 'construction', and now has a valid date and address, it's opened
                     if ((existingData[existingTempleIndex].Date.toLowerCase() === 'announced' || existingData[existingTempleIndex].Date.toLowerCase() === 'renovation' || existingData[existingTempleIndex].Date.toLowerCase() === 'construction') &&
                         (temple.Date && temple.Date.toLowerCase() !== 'announced' && temple.Date.toLowerCase() !== 'renovation' && temple.Date.toLowerCase() !== 'construction') && temple.Address) {
-                        recentlyOpenedTemples.push(temple.Name);
                         recentlyOpened = true;
                     }
 
@@ -139,22 +132,16 @@ async function scrapeTempleList(url) {
                     const newDate = temple.Date.toLowerCase().trim()
                     if (existingDate != newDate) {
                         if (existingDate == 'renovation' || existingDate == 'construction') {
-                            recentlyOpenedTemples.push(temple.Name);
                             recentlyOpened = true;
-                            // Update temple date
                             existingData[existingTempleIndex].Date = temple.Date;
                         }
                     }
 
-                    // Update the temple data with details if it doesn't have an address in existing data or if the newly scraped data has a valid address
                     if (!existingData[existingTempleIndex].Address || temple.Address) {
-                        // console.log('Updating address for:', temple.Name);
                         existingData[existingTempleIndex].Address = temple.Address;
                     }
 
-                    // Update the temple data with details if it doesn't have a location in existing data or if the newly scraped data has a valid location
                     if (!existingData[existingTempleIndex].Location || temple.Location) {
-                        // console.log('Updating address for:', temple.Name);
                         existingData[existingTempleIndex].Location = temple.Location;
                     }
                 }
@@ -164,28 +151,31 @@ async function scrapeTempleList(url) {
                     authorizeSearch = true;
                 }
 
-                // Call scrapeTempleDetails if the temple doesn't have an address
                 if (noExisting || authorizeSearch) {
-                    console.log('Searching temple details for:', temple.Name);
                     const templeNameSlug = temple.Name.toLowerCase().replace(/\s+/g, '-');
                     const templeDetailsUrl = `https://www.churchofjesuschrist.org/temples/details/${templeNameSlug}?lang=eng`;
-                    await scrapeTempleDetails(templeDetailsUrl, existingData, temple); // Pass temple object
+                    await scrapeTempleDetails(templeDetailsUrl, existingData, temple, progressBar); // Pass progressBar
                 }
             }
         }
 
-        if (recentlyOpenedTemples.length != 0) {
-            console.log('Temples recently opened:', recentlyOpenedTemples.join(', ')); // Log recently opened temples
+        progressBar.stop();
+
+        if (noExisting) {
+            console.log('Run program again to mark temples as attended, or to choose next temple');
         }
 
-        // Write updated data back to temples.json
+        if (recentlyOpenedTemples.length != 0) {
+            console.log('Temples recently opened:', recentlyOpenedTemples.join(', '));
+        }
+
         fs.writeFileSync('temples.json', JSON.stringify(existingData, null, 2));
         console.log('Data saved to temples.json');
 
         await browser.close();
     } catch (error) {
         console.error('An error occurred:', error);
-        await browser.close(); // Close the browser in case of error
+        await browser.close();
     }
 
     return noExisting;
@@ -197,19 +187,17 @@ const noExisting = scrapeTempleList(url)
     .then((noExistingValue) => {
         if (noExistingValue) {
             console.log("Run program again to mark temples as attended, or to choose next temple");
-            return noExistingValue; // Return the value to propagate it to the next chain
+            return noExistingValue;
         } else {
-            // Call templeAttender and handle its result
             return templeAttender().then(notAttendedCount => {
                 if (notAttendedCount === 0) {
                     challengeComplete = true;
                 } else {
-                    // Return a resolved promise with noExistingValue to proceed with the next steps
                     return Promise.resolve(noExistingValue);
                 }
             }).catch(error => {
                 console.error('An error occurred:', error);
-                return Promise.reject(error); // Propagate the error to the next chain
+                return Promise.reject(error);
             });
         }
     })
@@ -231,10 +219,8 @@ const noExisting = scrapeTempleList(url)
                 process.exit(0);
             }
 
-            // Call distanceCalculator
             distanceCalculator()
                 .then(() => {
-                    // After distanceCalculator completes, call templeSelector
                     return templeSelector();
                 })
                 .catch(error => {
@@ -246,9 +232,6 @@ const noExisting = scrapeTempleList(url)
         console.error('An error occurred:', error);
     });
 
-// Ensure that templeAttender() completes before moving to the next steps
-noExisting.then(() => {
-    // Additional steps after templeAttender() completes
-}).catch(error => {
+noExisting.then(() => {}).catch(error => {
     console.error('An error occurred:', error);
 });
