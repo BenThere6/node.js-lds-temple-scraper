@@ -2,7 +2,7 @@ const fs = require('fs');
 
 async function templeAttender() {
     const inquirer = (await import('inquirer')).default;
-    
+
     // Load temple data from temples.json
     const templeData = JSON.parse(fs.readFileSync('temples.json'));
 
@@ -47,21 +47,29 @@ async function templeAttender() {
             console.log(`${selectedTemple.temple} not marked as attended.`);
         }
     }
-    
+
     let wantToMark = true;
 
     while (wantToMark) {
-        const response = await inquirer.prompt({
-            type: 'confirm',
-            name: 'mark',
-            message: 'Do you want to mark a temple as attended?'
-        });
+        const templeData = JSON.parse(fs.readFileSync('temples.json'));
+        const notAttendedCount = templeData.filter(temple => temple.SessionAttended !== 'true' && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced').length;
 
-        if (!response.mark) {
-            console.log('Exiting temple attendance marking.');
-            wantToMark = false;
+        if (notAttendedCount === 0) {
+            console.log("\x1b[32mYOU HAVE ATTENDED EVERY OPEN UTAH TEMPLE!! Congrats! What's next?\x1b[0m");
+            return
         } else {
-            await promptMarkTemple();
+            const response = await inquirer.prompt({
+                type: 'confirm',
+                name: 'mark',
+                message: 'Do you want to mark a temple as attended?'
+            });
+
+            if (!response.mark) {
+                console.log('Exiting temple attendance marking.');
+                wantToMark = false;
+            } else {
+                await promptMarkTemple();
+            }
         }
     }
 }

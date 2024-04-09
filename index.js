@@ -181,11 +181,22 @@ const noExisting = scrapeTempleList(url)
     .then((noExistingValue) => {
         if (noExistingValue) {
             console.log("Run program again to mark temples as attended, or to choose next temple");
+            return noExistingValue; // Return the value to propagate it to the next chain
         } else {
-            // Return the promise returned by templeAttender() so that it can be awaited
-            return templeAttender();
+            // Call templeAttender and handle its result
+            return templeAttender().then(notAttendedCount => {
+                if (notAttendedCount === 0) {
+                    console.log("Exiting the program.");
+                    return Promise.resolve(noExistingValue); // Return a resolved promise with noExistingValue to exit the program
+                } else {
+                    // Return a resolved promise with noExistingValue to proceed with the next steps
+                    return Promise.resolve(noExistingValue);
+                }
+            }).catch(error => {
+                console.error('An error occurred:', error);
+                return Promise.reject(error); // Propagate the error to the next chain
+            });
         }
-        return noExistingValue;
     })
     .then((noExistingValue) => {
         if (!noExistingValue) {
@@ -195,12 +206,12 @@ const noExisting = scrapeTempleList(url)
             } catch {
                 templeData = [];
             }
-    
+
             console.log('Total number of temples:', templeData.length);
             console.log('Number of temples attended:', templeData.filter(temple => temple.SessionAttended === 'true').length);
             console.log('Number of temples not attended:', templeData.filter(temple => temple.SessionAttended !== 'true').length);
             console.log(`Total number of open temples not attended:`, templeData.filter(temple => temple.SessionAttended !== 'true' && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced').length);
-    
+
             // Call distanceCalculator
             distanceCalculator()
                 .then(() => {
@@ -214,7 +225,7 @@ const noExisting = scrapeTempleList(url)
     })
     .catch(error => {
         console.error('An error occurred:', error);
-    });    
+    });
 
 // Ensure that templeAttender() completes before moving to the next steps
 noExisting.then(() => {
