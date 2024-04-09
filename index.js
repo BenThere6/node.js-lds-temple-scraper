@@ -110,15 +110,14 @@ async function scrapeTempleList(url) {
 
             // If the temple doesn't exist in existingData, add it
             if (existingTempleIndex === -1) {
-                console.log('New temple found:', temple.Name);
+                // console.log('New temple found:', temple.Name);
+                newTemplesCount ++;
                 existingData.push(temple);
             }
         }
 
-        if (newTemples === 1) {
-            console.log(newTemplesCount, " new temple found")
-        } else if (newTemplesCount > 1){
-            console.log(newTemplesCount, " new temples found")
+        if (newTemplesCount > 0) {
+            console.log("New temples found:", newTemplesCount)
         }
 
         // Iterate through each temple in templeData
