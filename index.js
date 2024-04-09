@@ -212,7 +212,6 @@ async function scrapeTempleList(url) {
         }
 
         fs.writeFileSync('temples.json', JSON.stringify(existingData, null, 2));
-        console.log('Data saved to temples.json');
 
         await browser.close();
     } catch (error) {
