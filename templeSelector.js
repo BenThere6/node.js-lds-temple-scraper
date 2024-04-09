@@ -45,8 +45,6 @@ async function selectTempleToAttend() {
         startIndex += groupSize;
     }
 
-    console.log(groups)
-
     // Determine the number of scale options based on the number of available temples
     const scaleOptions = Math.min(numTemples, 5);
 

@@ -171,6 +171,7 @@ async function scrapeTempleList(url) {
         console.error('An error occurred:', error);
         await browser.close(); // Close the browser in case of error
     }
+
     return noExisting;
 }
 
@@ -188,16 +189,17 @@ const noExisting = scrapeTempleList(url)
     })
     .then((noExistingValue) => {
         if (!noExistingValue) {
-            let templeData = [];
+            let templeData;
             try {
                 templeData = JSON.parse(fs.readFileSync('temples.json'));
             } catch {
-                console.log("Will not count, no existing data.")
+                templeData = [];
             }
     
             console.log('Total number of temples:', templeData.length);
             console.log('Number of temples attended:', templeData.filter(temple => temple.SessionAttended === 'true').length);
             console.log('Number of temples not attended:', templeData.filter(temple => temple.SessionAttended !== 'true').length);
+            console.log(`Total number of open temples not attended:`, templeData.filter(temple => temple.SessionAttended !== 'true' && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced').length);
     
             // Call distanceCalculator
             distanceCalculator()
