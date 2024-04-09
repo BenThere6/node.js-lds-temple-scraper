@@ -4,6 +4,8 @@ const templeAttender = require('./templeAttender.js');
 const templeSelector = require('./templeSelector.js');
 const distanceCalculator = require('./distanceCalculator.js');
 
+let challengeComplete = false;
+
 async function scrapeTempleDetails(url, existingData, temple) {
     const browser = await puppeteer.launch({ headless: true });
     const page = await browser.newPage();
@@ -194,8 +196,7 @@ const noExisting = scrapeTempleList(url)
             // Call templeAttender and handle its result
             return templeAttender().then(notAttendedCount => {
                 if (notAttendedCount === 0) {
-                    console.log("Exiting the program.");
-                    return Promise.resolve(noExistingValue); // Return a resolved promise with noExistingValue to exit the program
+                    challengeComplete = true;
                 } else {
                     // Return a resolved promise with noExistingValue to proceed with the next steps
                     return Promise.resolve(noExistingValue);
@@ -219,6 +220,10 @@ const noExisting = scrapeTempleList(url)
             console.log('Number of temples attended:', templeData.filter(temple => temple.SessionAttended === 'true').length);
             console.log('Number of temples not attended:', templeData.filter(temple => temple.SessionAttended !== 'true').length);
             console.log(`Total number of open temples not attended:`, templeData.filter(temple => temple.SessionAttended !== 'true' && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced').length);
+
+            if (challengeComplete) {
+                process.exit(0);
+            }
 
             // Call distanceCalculator
             distanceCalculator()

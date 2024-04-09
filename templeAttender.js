@@ -15,7 +15,7 @@ async function templeAttender() {
 
         if (templesToAttend.length === 0) {
             console.log('You have attended every available temple in Utah!');
-            return;
+            return 0; // Return 0 when all temples are attended
         }
 
         // Prompt user to mark temples as attended
@@ -28,7 +28,7 @@ async function templeAttender() {
 
         if (selectedTemple.temple === 'Exit') {
             console.log('Exiting temple attendance marking.');
-            return;
+            return 0; // Return 0 when the user chooses to exit
         }
 
         const confirmAttendance = await inquirer.prompt({
@@ -43,20 +43,22 @@ async function templeAttender() {
             templeData[templeIndex].SessionAttended = 'true';
             fs.writeFileSync('temples.json', JSON.stringify(templeData, null, 2));
             console.log(`${selectedTemple.temple} marked as attended.`);
+            return 1; // Return 1 when a temple is marked attended
         } else {
             console.log(`${selectedTemple.temple} not marked as attended.`);
+            return 0; // Return 0 when the user chooses not to mark a temple attended
         }
     }
 
+    let notAttendedCount = 0;
     let wantToMark = true;
 
     while (wantToMark) {
-        const templeData = JSON.parse(fs.readFileSync('temples.json'));
-        const notAttendedCount = templeData.filter(temple => temple.SessionAttended !== 'true' && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced').length;
+        notAttendedCount = templeData.filter(temple => temple.SessionAttended !== 'true' && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced').length;
 
         if (notAttendedCount === 0) {
             console.log("\x1b[32mYOU HAVE ATTENDED EVERY OPEN UTAH TEMPLE!! Congrats! What's next?\x1b[0m");
-            return
+            return notAttendedCount; // Return the count when all temples are attended
         } else {
             const response = await inquirer.prompt({
                 type: 'confirm',
@@ -68,10 +70,13 @@ async function templeAttender() {
                 console.log('Exiting temple attendance marking.');
                 wantToMark = false;
             } else {
-                await promptMarkTemple();
+                const marked = await promptMarkTemple();
+                if (marked === 0) return notAttendedCount; // Return the count if no temple is marked
             }
         }
     }
+
+    return notAttendedCount; // Return the final count
 }
 
 module.exports = templeAttender;
