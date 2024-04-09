@@ -2,6 +2,7 @@ const fs = require('fs');
 
 async function selectTempleToAttend() {
     const inquirer = (await import('inquirer')).default;
+    const open = (await import('open')).default;
 
     const response = await inquirer.prompt({
         type: 'confirm',
@@ -63,11 +64,25 @@ async function selectTempleToAttend() {
     const selectedGroup = groups[answers.distanceScale];
     const randomTemple = selectedGroup[Math.floor(Math.random() * selectedGroup.length)];
 
+    const templeNameSlug = randomTemple.Name.toLowerCase().replace(/\s+/g, '-');
+    const templeDetailsUrl = `https://www.churchofjesuschrist.org/temples/details/${templeNameSlug}?lang=eng`;
+
     // Log the selected temple's information
     console.log(`Selected Temple:
     Name: ${randomTemple.Name}
     Address: ${randomTemple.Address}
     Distance: ${randomTemple.Distance} miles`);
+
+    // Prompt the user to open the temple website after the temple has been selected
+    inquirer.prompt({
+        type: 'confirm',
+        name: 'openWebsite',
+        message: 'Do you want to open the temple website?'
+    }).then((openWebsiteResponse) => {
+        if (openWebsiteResponse.openWebsite) {
+            open(templeDetailsUrl);
+        }
+    });
 }
 
 module.exports = selectTempleToAttend;
