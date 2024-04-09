@@ -17,10 +17,10 @@ async function selectTempleToAttend() {
     // Read temple data from JSON file
     const templeData = JSON.parse(fs.readFileSync('temples.json'));
 
-    // Filter out temples with date as "Announced", "Construction", or "Renovation"
+    // Filter out temples with date as "Announced", "Construction", or "Renovation" and SessionAttended is not "true"
     const filteredTempleData = templeData.filter(temple => {
         const date = temple.Date.toLowerCase();
-        return !(date.includes('announced') || date.includes('construction') || date.includes('renovation'));
+        return !(date.includes('announced') || date.includes('construction') || date.includes('renovation')) && temple.SessionAttended !== 'true';
     }).filter(temple => typeof temple.Distance === 'string' && temple.Distance.trim() !== '');
 
     // Sort filtered temples by distance
@@ -44,6 +44,8 @@ async function selectTempleToAttend() {
         groups.push(group);
         startIndex += groupSize;
     }
+
+    console.log(groups)
 
     // Determine the number of scale options based on the number of available temples
     const scaleOptions = Math.min(numTemples, 5);
