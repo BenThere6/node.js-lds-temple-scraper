@@ -103,6 +103,7 @@ async function scrapeTempleList(url) {
         }
 
         // Iterate through each temple in templeData
+        let newTemplesCount = 0;
         for (const temple of templeData) {
             // Check if the temple already exists in existingData
             const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
@@ -112,6 +113,12 @@ async function scrapeTempleList(url) {
                 console.log('New temple found:', temple.Name);
                 existingData.push(temple);
             }
+        }
+
+        if (newTemples === 1) {
+            console.log(newTemplesCount, " new temple found")
+        } else if (newTemplesCount > 1){
+            console.log(newTemplesCount, " new temples found")
         }
 
         // Iterate through each temple in templeData
