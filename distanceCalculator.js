@@ -42,13 +42,12 @@ async function calculateTempleDistances() {
     const inquirer = (await import('inquirer')).default;
     try {
         let anyTempleNeedsDistance = false;
-        let totalRequests = 0;
+        let totalRequests = templeData.filter(temple => temple.Address && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced').length;
         let completedRequests = 0;
 
         for (const temple of templeData) {
             if (temple.Address && temple.Distance === '') {
                 anyTempleNeedsDistance = true;
-                totalRequests++; // Increment total number of requests
             }
         }
 
@@ -69,7 +68,7 @@ async function calculateTempleDistances() {
             progressBar.start(totalRequests, 0); // Start progress bar with total number of requests
 
             for (const temple of templeData) {
-                if (temple.Address) {
+                if (temple.Address && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced') {
                     const distance = await calculateDistance(cityResponse.city, temple.Address);
                     temple.Distance = `${Math.round(distance)}`;
                     completedRequests++; // Increment completed requests
