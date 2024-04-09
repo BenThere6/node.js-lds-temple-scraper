@@ -114,6 +114,7 @@ async function scrapeTempleList(url) {
 
         // Iterate through each temple in templeData
         for (const temple of templeData) {
+            let recentlyOpened = false;
             if (temple.Location && temple.Location.toLowerCase().includes('utah')) {
                 // Find the corresponding temple in existing data
                 const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
@@ -123,6 +124,7 @@ async function scrapeTempleList(url) {
                     if ((existingData[existingTempleIndex].Date.toLowerCase() === 'announced' || existingData[existingTempleIndex].Date.toLowerCase() === 'renovation' || existingData[existingTempleIndex].Date.toLowerCase() === 'construction') &&
                         (temple.Date && temple.Date.toLowerCase() !== 'announced' && temple.Date.toLowerCase() !== 'renovation' && temple.Date.toLowerCase() !== 'construction') && temple.Address) {
                         recentlyOpenedTemples.push(temple.Name);
+                        recentlyOpened = true;
                     }
 
                     const existingDate = existingData[existingTempleIndex].Date.toLowerCase().trim()
@@ -130,6 +132,7 @@ async function scrapeTempleList(url) {
                     if (existingDate != newDate) {
                         if (existingDate == 'renovation' || existingDate == 'construction') {
                             recentlyOpenedTemples.push(temple.Name);
+                            recentlyOpened = true;
                             // Update temple date
                             existingData[existingTempleIndex].Date = temple.Date;
                         }
@@ -148,8 +151,13 @@ async function scrapeTempleList(url) {
                     }
                 }
 
+                let authorizeSearch = false;
+                if (recentlyOpened && !existingData[existingTempleIndex].Address) {
+                    authorizeSearch = true;
+                }
+
                 // Call scrapeTempleDetails if the temple doesn't have an address
-                if (noExisting || !existingData[existingTempleIndex].Address) {
+                if (noExisting || authorizeSearch) {
                     console.log('Searching temple details for:', temple.Name);
                     const templeNameSlug = temple.Name.toLowerCase().replace(/\s+/g, '-');
                     const templeDetailsUrl = `https://www.churchofjesuschrist.org/temples/details/${templeNameSlug}?lang=eng`;
