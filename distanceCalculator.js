@@ -46,7 +46,7 @@ async function calculateTempleDistances() {
         let completedRequests = 0;
 
         for (const temple of templeData) {
-            if (temple.Address && temple.Distance === '') {
+            if (temple.Address && temple.Distance === '' && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced' && temple.SessionAttended === '') {
                 anyTempleNeedsDistance = true;
             }
         }
