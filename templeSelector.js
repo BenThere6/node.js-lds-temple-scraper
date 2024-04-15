@@ -62,7 +62,21 @@ async function selectTempleToAttend() {
     });
 
     const selectedGroup = groups[answers.distanceScale];
-    const randomTemple = selectedGroup[Math.floor(Math.random() * selectedGroup.length)];
+
+    // Shuffle function to randomly reorder elements in an array
+    function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
+
+    // Shuffle the selected group of temples
+    const shuffledGroup = shuffle(selectedGroup);
+
+    // Select the first temple from the shuffled group
+    const randomTemple = shuffledGroup[0];
 
     const templeNameSlug = randomTemple.Name.toLowerCase().replace(/\s+/g, '-');
     const templeDetailsUrl = `https://www.churchofjesuschrist.org/temples/details/${templeNameSlug}?lang=eng`;
