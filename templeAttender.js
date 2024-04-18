@@ -10,7 +10,7 @@ async function templeAttender() {
     async function promptMarkTemple() {
         // Filter temples where SessionAttended is empty and date is not "Announced", "Construction", or "Renovation"
         const templesToAttend = templeData.filter(temple => {
-            return temple.SessionAttended === '' && !['Announced', 'Construction', 'Renovation'].includes(temple.Date);
+            return temple.SessionAttended === '' && !['Announced', 'Construction', 'Renovation', 'Opening Soon'].includes(temple.Date);
         });
 
         if (templesToAttend.length === 0) {

@@ -42,11 +42,11 @@ async function calculateTempleDistances() {
     const inquirer = (await import('inquirer')).default;
     try {
         let anyTempleNeedsDistance = false;
-        let totalRequests = templeData.filter(temple => temple.Address && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced' && temple.SessionAttended === '').length;
+        let totalRequests = templeData.filter(temple => temple.Address && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Opening Soon' && temple.Date !== 'Announced' && temple.SessionAttended === '').length;
         let completedRequests = 0;
 
         for (const temple of templeData) {
-            if (temple.Address && temple.Distance === '' && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced' && temple.SessionAttended === '') {
+            if (temple.Address && temple.Distance === '' && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Opening Soon' && temple.Date !== 'Announced' && temple.SessionAttended === '') {
                 anyTempleNeedsDistance = true;
             }
         }
@@ -68,7 +68,7 @@ async function calculateTempleDistances() {
             progressBar.start(totalRequests, 0); // Start progress bar with total number of requests
 
             for (const temple of templeData) {
-                if (temple.Address && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced' && temple.SessionAttended === '') {
+                if (temple.Address && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Opening Soon' && temple.Date !== 'Announced' && temple.SessionAttended === '') {
                     const distance = await calculateDistance(cityResponse.city, temple.Address);
                     temple.Distance = `${Math.round(distance)}`;
                     completedRequests++; // Increment completed requests

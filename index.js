@@ -123,15 +123,15 @@ async function scrapeTempleList(url) {
                 const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
 
                 if (existingTempleIndex !== -1) {
-                    if ((existingData[existingTempleIndex].Date.toLowerCase() === 'announced' || existingData[existingTempleIndex].Date.toLowerCase() === 'renovation' || existingData[existingTempleIndex].Date.toLowerCase() === 'construction') &&
-                        (temple.Date && temple.Date.toLowerCase() !== 'announced' && temple.Date.toLowerCase() !== 'renovation' && temple.Date.toLowerCase() !== 'construction') && temple.Address) {
+                    if ((existingData[existingTempleIndex].Date.toLowerCase() === 'announced' || existingData[existingTempleIndex].Date.toLowerCase() === 'renovation' || existingData[existingTempleIndex].Date.toLowerCase() === 'construction' || existingData[existingTempleIndex].Date.toLowerCase() === 'opening soon') &&
+                        (temple.Date && temple.Date.toLowerCase() !== 'announced' && temple.Date.toLowerCase() !== 'renovation' && temple.Date.toLowerCase() !== 'construction'&& temple.Date.toLowerCase() !== 'opening soon') && temple.Address) {
                         recentlyOpened = true;
                     }
 
                     const existingDate = existingData[existingTempleIndex].Date.toLowerCase().trim()
                     const newDate = temple.Date.toLowerCase().trim()
                     if (existingDate != newDate) {
-                        if (existingDate == 'renovation' || existingDate == 'construction') {
+                        if (existingDate == 'renovation' || existingDate == 'construction' || existingDate == 'opening soon') {
                             recentlyOpened = true;
                         }
                     }
@@ -167,8 +167,8 @@ async function scrapeTempleList(url) {
                 const existingTempleIndex = existingData.findIndex(item => item.Name === temple.Name);
 
                 if (existingTempleIndex !== -1) {
-                    if ((existingData[existingTempleIndex].Date.toLowerCase() === 'announced' || existingData[existingTempleIndex].Date.toLowerCase() === 'renovation' || existingData[existingTempleIndex].Date.toLowerCase() === 'construction') &&
-                        (temple.Date && temple.Date.toLowerCase() !== 'announced' && temple.Date.toLowerCase() !== 'renovation' && temple.Date.toLowerCase() !== 'construction') && temple.Address) {
+                    if ((existingData[existingTempleIndex].Date.toLowerCase() === 'announced' || existingData[existingTempleIndex].Date.toLowerCase() === 'renovation' || existingData[existingTempleIndex].Date.toLowerCase() === 'construction' || existingData[existingTempleIndex].Date.toLowerCase() === 'opening soon') &&
+                        (temple.Date && temple.Date.toLowerCase() !== 'announced' && temple.Date.toLowerCase() !== 'renovation' && temple.Date.toLowerCase() !== 'construction' && temple.Date.toLowerCase() !== 'opening soon') && temple.Address) {
                         recentlyOpened = true;
                         recentlyOpenedTemples.push(temple.Name);
                     }
@@ -176,7 +176,7 @@ async function scrapeTempleList(url) {
                     const existingDate = existingData[existingTempleIndex].Date.toLowerCase().trim()
                     const newDate = temple.Date.toLowerCase().trim()
                     if (existingDate != newDate) {
-                        if (existingDate == 'renovation' || existingDate == 'construction') {
+                        if (existingDate == 'renovation' || existingDate == 'construction' || existingDate == 'opening soon') {
                             recentlyOpened = true;
                             recentlyOpenedTemples.push(temple.Name);
                             existingData[existingTempleIndex].Date = temple.Date;
@@ -254,7 +254,7 @@ const noExisting = scrapeTempleList(url)
             console.log('Total number of temples:', templeData.length);
             console.log('Number of temples attended:', templeData.filter(temple => temple.SessionAttended === 'true').length);
             console.log('Number of temples not attended:', templeData.filter(temple => temple.SessionAttended !== 'true').length);
-            console.log(`Total number of open temples not attended:`, templeData.filter(temple => temple.SessionAttended !== 'true' && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced').length);
+            console.log(`Total number of open temples not attended:`, templeData.filter(temple => temple.SessionAttended !== 'true' && temple.Date !== 'Construction' && temple.Date !== 'Renovation' && temple.Date !== 'Announced' && temple.Date !== 'Opening Soon').length);
 
             if (challengeComplete) {
                 process.exit(0);
